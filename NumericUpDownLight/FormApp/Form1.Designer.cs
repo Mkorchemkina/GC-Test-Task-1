@@ -1,7 +1,7 @@
 ﻿
 namespace FormApp
 {
-    partial class Form1
+    partial class DemoForm
     {
         /// <summary>
         /// Обязательная переменная конструктора.
@@ -34,20 +34,22 @@ namespace FormApp
             // 
             // numericUpDownLight1
             // 
-            this.numericUpDownLight1.Location = new System.Drawing.Point(349, 65);
+            this.numericUpDownLight1.Location = new System.Drawing.Point(13, 13);
             this.numericUpDownLight1.Name = "numericUpDownLight1";
-            this.numericUpDownLight1.Size = new System.Drawing.Size(75, 23);
+            this.numericUpDownLight1.Size = new System.Drawing.Size(60, 20);
             this.numericUpDownLight1.TabIndex = 0;
-            this.numericUpDownLight1.Text = "numericUpDownLight1";
+            this.numericUpDownLight1.Text = null;
+            this.numericUpDownLight1.TextAlign = NumericUpDownLight.NumericUpDownLight.TextAlignType.Left;
+            this.numericUpDownLight1.Value = 42;
             // 
-            // Form1
+            // DemoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(211, 68);
             this.Controls.Add(this.numericUpDownLight1);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "DemoForm";
+            this.Text = "Demo";
             this.ResumeLayout(false);
 
         }
