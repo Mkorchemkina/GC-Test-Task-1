@@ -40,13 +40,14 @@ namespace FormApp
             this.numericUpDownLight1.TabIndex = 0;
             this.numericUpDownLight1.Text = null;
             this.numericUpDownLight1.TextAlign = NumericUpDownLight.NumericUpDownLight.TextAlignType.Left;
-            this.numericUpDownLight1.Value = 42;
+            this.numericUpDownLight1.Value = 0;
+            this.numericUpDownLight1.ValueChanged += new System.EventHandler<int>(this.numericUpDownLight1_ValueChanged);
             // 
             // DemoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(211, 68);
+            this.ClientSize = new System.Drawing.Size(171, 67);
             this.Controls.Add(this.numericUpDownLight1);
             this.Name = "DemoForm";
             this.Text = "Demo";

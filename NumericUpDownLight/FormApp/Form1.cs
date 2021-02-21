@@ -16,5 +16,13 @@ namespace FormApp
         {
             InitializeComponent();
         }
+
+        private void numericUpDownLight1_ValueChanged(object sender, int e)
+        {
+            if (this.ForeColor != Color.Red)
+                this.ForeColor = Color.Red;
+            else
+                this.ForeColor = Color.Blue;
+        }
     }
 }
