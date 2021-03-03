@@ -11,6 +11,10 @@ namespace NumericUpDownLight
 {
     public class NumericUpDownLight : System.Windows.Forms.Control
     {
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
         //Add a new field  - Value
         public int Value { get; set; }
         //Add a new field  - TextAlign
@@ -22,15 +26,23 @@ namespace NumericUpDownLight
            Browsable(false)
         ]
         public override string Text { get; set; }
+        private readonly int ButtonWidth = 20;
+
+       
 
         public NumericUpDownLight()
         {
             InitializeComponent();
+            
         }
 
         void InitializeComponent()
         {
-            this.Size = new Size(60, 20);
+            Size = new Size(70, 30);
+            ControlStyles StyleToSet = ControlStyles.FixedHeight;
+            StyleToSet |= (ControlStyles.UserPaint | ControlStyles.DoubleBuffer|ControlStyles.AllPaintingInWmPaint);
+            SetStyle(StyleToSet, true);
+            UpdateStyles();
         }
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -38,68 +50,85 @@ namespace NumericUpDownLight
             base.OnPaint(e);
 
             Color MyBlack;
-            if (this.BackColor != Color.Black)
+            if (BackColor != Color.Black)
                 MyBlack = Color.Black;
             else
                 MyBlack = Color.White;
-
+           
             SolidBrush BlackBrush = new SolidBrush(MyBlack);
-            SolidBrush TextBrush = new SolidBrush(this.ForeColor);
-            SolidBrush WhiteBrush = new SolidBrush(this.BackColor);
+            SolidBrush WhiteBrush = new SolidBrush(BackColor);
             SolidBrush ColorBrush = new SolidBrush(Color.Green); //temp
             Pen BlackPen = new Pen(MyBlack, 1);
 
-            //control
-            e.Graphics.FillRectangle(WhiteBrush, 0, 0, this.Size.Width, this.Size.Height);
-            e.Graphics.DrawRectangle(BlackPen, 0, 0, this.Size.Width, this.Size.Height - 1);
-
-            //buttons
-            //up button
-            e.Graphics.DrawRectangle(BlackPen, (int)(this.Size.Width * 0.8), 0, (int)(this.Size.Width * 0.2), this.Size.Height / 2);
-            PointF[] ArrowUpTriangle = { new PointF(this.Size.Width * 0.85F, this.Size.Height * 0.3F), new PointF(this.Size.Width * 0.9F, this.Size.Height * 0.15F), new PointF(this.Size.Width * 0.95F, this.Size.Height * 0.3F) };
-            e.Graphics.FillPolygon(BlackBrush, ArrowUpTriangle);
-            //down button
-            e.Graphics.DrawRectangle(BlackPen, (int)(this.Size.Width * 0.8), this.Size.Height / 2, (int)(this.Size.Width * 0.2), this.Size.Height / 2 - 1);
-            PointF[] ArrowDownTriangle = { new PointF(this.Size.Width * 0.85F, this.Size.Height * 0.7F), new PointF(this.Size.Width * 0.9F, this.Size.Height * 0.85F), new PointF(this.Size.Width * 0.95F, this.Size.Height * 0.7F) };
-            e.Graphics.FillPolygon(BlackBrush, ArrowDownTriangle);
-
-            int XLeft = 0;
-            int YTop = Math.Abs(this.Height - (int)this.Font.Height) / 2;
-            switch (this.TextAlign.ToString())
+            try
             {
-                case "Left":
-                    {
-                        XLeft = 2;
-                        break;
-                    }
-                case "Center":
-                    {
-                        XLeft = (int)(this.Width * 0.4 - Value.ToString().Length * this.Font.Size / 2);
-                        break;
-                    }
-                case "Right":
-                    {
-                        //this.Width * 0.8 - 2 - right end of the string, Value.ToString().Length * this.Font.Size - width of word (fix it)
-                        XLeft = (int)(this.Width * 0.8 - 2 - Value.ToString().Length * this.Font.Size);
-                        break;
-                    }
+                //control
+                e.Graphics.FillRectangle(WhiteBrush, 0, 0, Size.Width, Size.Height);
+                e.Graphics.DrawRectangle(BlackPen, 0, 0, Size.Width, Size.Height - 1);
+
+                //buttons
+                
+                //up button
+                e.Graphics.FillRectangle(WhiteBrush, Size.Width - ButtonWidth, 0, ButtonWidth - 1, Size.Height / 2);
+                e.Graphics.DrawRectangle(BlackPen, Size.Width - ButtonWidth, 0, ButtonWidth - 1, Size.Height / 2);
+                PointF[] ArrowUpTriangle = { new PointF(Size.Width - ButtonWidth + 5, Size.Height / 3), new PointF(Size.Width - ButtonWidth / 2, 3), new PointF(Size.Width - 5, Size.Height / 3) };
+                e.Graphics.FillPolygon(BlackBrush, ArrowUpTriangle);
+                //down button
+                e.Graphics.FillRectangle(WhiteBrush, Size.Width - ButtonWidth, Size.Height / 2, ButtonWidth - 1, Size.Height / 2 - 1);
+                e.Graphics.DrawRectangle(BlackPen, Size.Width - ButtonWidth, Size.Height / 2, ButtonWidth - 1, Size.Height / 2 - 1);
+                PointF[] ArrowDownTriangle = { new PointF(Size.Width - ButtonWidth + 5, 2*Size.Height / 3 - 1), new PointF(Size.Width - 5, 2*Size.Height / 3 - 1), new PointF(Size.Width - ButtonWidth / 2, Size.Height - 4) };
+                e.Graphics.FillPolygon(BlackBrush, ArrowDownTriangle);
+
+                TextFormatFlags flags = TextFormatFlags.VerticalCenter;
+                switch (TextAlign)
+                {
+                    case TextAlignType.Left:
+                        {
+                            flags |= TextFormatFlags.Left;
+                            break;
+                        }
+                    case TextAlignType.Center:
+                        {
+                            flags |= TextFormatFlags.HorizontalCenter;
+                            break;
+                        }
+                    case TextAlignType.Right:
+                        {
+                            flags |= TextFormatFlags.Right;
+                            break;
+                        }
+                }
+                TextRenderer.DrawText(e.Graphics, Value.ToString(), Font, new Rectangle(0, 0, Size.Width - ButtonWidth, Size.Height), ForeColor, flags);
             }
-
-            e.Graphics.DrawString(Value.ToString(), this.Font, TextBrush, new PointF(XLeft, YTop));
-
+            finally
+            {
+                BlackBrush.Dispose();
+                WhiteBrush.Dispose();
+                ColorBrush.Dispose();
+                BlackPen.Dispose();
+            }
         }
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
         }
 
+        public delegate void _OnClick();
+        new public event _OnClick OnClick;
+        
 
-        public event EventHandler<int> ValueChanged;
+        public event EventHandler ValueChanged;
 
-        private void ChangeValue()
+        private void ChangeValue(int add)
         {
-            this.Value += 0;
-            ValueChanged?.Invoke(this, this.Value);
+            Value += add;
+            ValueChanged?.Invoke(new object(), new EventArgs());
         }
+
+        private void ProcessValueChangedEvent(object sender, EventArgs e)
+        {
+            ChangeValue(1);
+        }
+
     }
 }
