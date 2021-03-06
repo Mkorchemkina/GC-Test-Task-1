@@ -11,36 +11,91 @@ namespace NumericUpDownLight
 {
     public class NumericUpDownLight : System.Windows.Forms.Control
     {
-        protected override void Dispose(bool disposing)
+        private int StoreValue;
+        public int Value
         {
-            base.Dispose(disposing);
+            get
+            {
+                return StoreValue;
+            }
+            set
+            {
+                if (StoreValue != value)
+                {
+                    StoreValue = value;
+                    Invalidate();
+                    ValueChanged?.Invoke(this, new EventArgs());
+                }
+            }
         }
-        //Add a new field  - Value
-        public int Value { get; set; }
-        //Add a new field  - TextAlign
-        public enum TextAlignType { Left, Center, Right };
-        public TextAlignType TextAlign { get; set; }
 
-        //Hide the "Text" field 
+        private ContentAlignment StoreTextAlign;
+        public ContentAlignment TextAlign
+        {
+            get
+            {
+                return StoreTextAlign;
+            }
+            set
+            {
+                if (StoreTextAlign != value)
+                {
+                    StoreTextAlign = value;
+                    Invalidate();
+                }
+            }
+        }
+
+
         [
            Browsable(false)
         ]
         public override string Text { get; set; }
-        private readonly int ButtonWidth = 20;
+        private const int ButtonWidth = 20;
+        Rectangle FieldRect
+        {
+            get
+            {
+                return new Rectangle(0, 0, Size.Width, Size.Height);
+            }
 
-       
+        }
+        Rectangle UpButtonRect
+        {
+            get
+            {
+                return new Rectangle(Size.Width - ButtonWidth, 0, ButtonWidth - 1, Size.Height / 2);
+            }
+        }
+        Rectangle DownButtonRect
+        {
+            get
+            {
+                return new Rectangle(Size.Width - ButtonWidth, Size.Height / 2, ButtonWidth - 1, Size.Height / 2 - 1);
+            }
+        }
+        Rectangle TextRect
+        {
+            get
+            {
+                return new Rectangle(0, 0, Size.Width - ButtonWidth, Size.Height);
+            }
+        }
+
+        public Color ButtonLightColor { get; set; }
 
         public NumericUpDownLight()
         {
             InitializeComponent();
-            
+
         }
 
         void InitializeComponent()
         {
             Size = new Size(70, 30);
+
             ControlStyles StyleToSet = ControlStyles.FixedHeight;
-            StyleToSet |= (ControlStyles.UserPaint | ControlStyles.DoubleBuffer|ControlStyles.AllPaintingInWmPaint);
+            StyleToSet |= (ControlStyles.UserPaint | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint);
             SetStyle(StyleToSet, true);
             UpdateStyles();
         }
@@ -54,81 +109,129 @@ namespace NumericUpDownLight
                 MyBlack = Color.Black;
             else
                 MyBlack = Color.White;
-           
-            SolidBrush BlackBrush = new SolidBrush(MyBlack);
-            SolidBrush WhiteBrush = new SolidBrush(BackColor);
-            SolidBrush ColorBrush = new SolidBrush(Color.Green); //temp
-            Pen BlackPen = new Pen(MyBlack, 1);
 
-            try
+            Color UpBColor = BackColor;
+            Color DownBColor = BackColor;
+
+            Point MousePoint = PointToClient(MousePosition);
+            if (UpButtonRect.Contains(MousePoint))
+                UpBColor = ButtonLightColor;
+            if (DownButtonRect.Contains(MousePoint))
+                DownBColor = ButtonLightColor;
+
+            using (SolidBrush ArrowBrush = new SolidBrush(MyBlack))
+            using (SolidBrush BackBrush = new SolidBrush(BackColor))
+            using (SolidBrush UpBBrush = new SolidBrush(UpBColor))
+            using (SolidBrush DownBBrush = new SolidBrush(DownBColor))
+            using (Pen BlackPen = new Pen(MyBlack, 1))
             {
+
                 //control
-                e.Graphics.FillRectangle(WhiteBrush, 0, 0, Size.Width, Size.Height);
-                e.Graphics.DrawRectangle(BlackPen, 0, 0, Size.Width, Size.Height - 1);
+                e.Graphics.FillRectangle(BackBrush, FieldRect);
+                e.Graphics.DrawRectangle(BlackPen, FieldRect);
 
                 //buttons
-                
-                //up button
-                e.Graphics.FillRectangle(WhiteBrush, Size.Width - ButtonWidth, 0, ButtonWidth - 1, Size.Height / 2);
-                e.Graphics.DrawRectangle(BlackPen, Size.Width - ButtonWidth, 0, ButtonWidth - 1, Size.Height / 2);
-                PointF[] ArrowUpTriangle = { new PointF(Size.Width - ButtonWidth + 5, Size.Height / 3), new PointF(Size.Width - ButtonWidth / 2, 3), new PointF(Size.Width - 5, Size.Height / 3) };
-                e.Graphics.FillPolygon(BlackBrush, ArrowUpTriangle);
-                //down button
-                e.Graphics.FillRectangle(WhiteBrush, Size.Width - ButtonWidth, Size.Height / 2, ButtonWidth - 1, Size.Height / 2 - 1);
-                e.Graphics.DrawRectangle(BlackPen, Size.Width - ButtonWidth, Size.Height / 2, ButtonWidth - 1, Size.Height / 2 - 1);
-                PointF[] ArrowDownTriangle = { new PointF(Size.Width - ButtonWidth + 5, 2*Size.Height / 3 - 1), new PointF(Size.Width - 5, 2*Size.Height / 3 - 1), new PointF(Size.Width - ButtonWidth / 2, Size.Height - 4) };
-                e.Graphics.FillPolygon(BlackBrush, ArrowDownTriangle);
 
-                TextFormatFlags flags = TextFormatFlags.VerticalCenter;
+                //up button
+                e.Graphics.FillRectangle(UpBBrush, UpButtonRect);
+                e.Graphics.DrawRectangle(BlackPen, UpButtonRect);
+                PointF[] ArrowUpTriangle = { new PointF(Size.Width - ButtonWidth + 5, Size.Height / 3), new PointF(Size.Width - ButtonWidth / 2, 3), new PointF(Size.Width - 5, Size.Height / 3) };
+                e.Graphics.FillPolygon(ArrowBrush, ArrowUpTriangle);
+                //down button
+                e.Graphics.FillRectangle(DownBBrush, DownButtonRect);
+                e.Graphics.DrawRectangle(BlackPen, DownButtonRect);
+                PointF[] ArrowDownTriangle = { new PointF(Size.Width - ButtonWidth + 5, 2 * Size.Height / 3 - 1), new PointF(Size.Width - 5, 2 * Size.Height / 3 - 1), new PointF(Size.Width - ButtonWidth / 2, Size.Height - 4) };
+                e.Graphics.FillPolygon(ArrowBrush, ArrowDownTriangle);
+
+                TextFormatFlags flags = TextFormatFlags.Default;
                 switch (TextAlign)
                 {
-                    case TextAlignType.Left:
+                    case ContentAlignment.TopLeft:
                         {
-                            flags |= TextFormatFlags.Left;
+                            flags |= TextFormatFlags.Left | TextFormatFlags.Top;
                             break;
                         }
-                    case TextAlignType.Center:
+                    case ContentAlignment.TopCenter:
                         {
-                            flags |= TextFormatFlags.HorizontalCenter;
+                            flags |= TextFormatFlags.HorizontalCenter | TextFormatFlags.Top;
                             break;
                         }
-                    case TextAlignType.Right:
+                    case ContentAlignment.TopRight:
                         {
-                            flags |= TextFormatFlags.Right;
+                            flags |= TextFormatFlags.Right | TextFormatFlags.Top;
+                            break;
+                        }
+                    case ContentAlignment.MiddleLeft:
+                        {
+                            flags |= TextFormatFlags.Left | TextFormatFlags.VerticalCenter;
+                            break;
+                        }
+                    case ContentAlignment.MiddleCenter:
+                        {
+                            flags |= TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter;
+                            break;
+                        }
+                    case ContentAlignment.MiddleRight:
+                        {
+                            flags |= TextFormatFlags.Right | TextFormatFlags.VerticalCenter;
+                            break;
+                        }
+                    case ContentAlignment.BottomLeft:
+                        {
+                            flags |= TextFormatFlags.Left | TextFormatFlags.Bottom;
+                            break;
+                        }
+                    case ContentAlignment.BottomCenter:
+                        {
+                            flags |= TextFormatFlags.HorizontalCenter | TextFormatFlags.Bottom;
+                            break;
+                        }
+                    case ContentAlignment.BottomRight:
+                        {
+                            flags |= TextFormatFlags.Right | TextFormatFlags.Bottom;
                             break;
                         }
                 }
-                TextRenderer.DrawText(e.Graphics, Value.ToString(), Font, new Rectangle(0, 0, Size.Width - ButtonWidth, Size.Height), ForeColor, flags);
+                TextRenderer.DrawText(e.Graphics, Value.ToString(), Font, TextRect, ForeColor, flags);
             }
-            finally
-            {
-                BlackBrush.Dispose();
-                WhiteBrush.Dispose();
-                ColorBrush.Dispose();
-                BlackPen.Dispose();
-            }
-        }
-        protected override void OnResize(EventArgs e)
-        {
-            base.OnResize(e);
         }
 
-        public delegate void _OnClick();
-        new public event _OnClick OnClick;
-        
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            // do some other stuff
+            Point MousePoint = e.Location;
+            if (UpButtonRect.Contains(MousePoint))
+            {
+                Invalidate();
+            }
+            if (DownButtonRect.Contains(MousePoint))
+            {
+                Invalidate();
+            }
+            base.OnMouseMove(e);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            // do some other stuff
+            Point ClickPoint = e.Location;
+
+            //to screen?
+            if (UpButtonRect.Contains(ClickPoint))
+            {
+                //up button
+                //down button
+                Value++;
+            }
+            if (DownButtonRect.Contains(ClickPoint))
+            {
+                Value--;
+            }
+            base.OnMouseDown(e);
+        }
+
 
         public event EventHandler ValueChanged;
-
-        private void ChangeValue(int add)
-        {
-            Value += add;
-            ValueChanged?.Invoke(new object(), new EventArgs());
-        }
-
-        private void ProcessValueChangedEvent(object sender, EventArgs e)
-        {
-            ChangeValue(1);
-        }
 
     }
 }
