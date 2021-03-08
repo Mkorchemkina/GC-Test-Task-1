@@ -17,10 +17,5 @@ namespace FormApp
             InitializeComponent();
         }
 
-        private void numericUpDownLight1_ValueChanged(object sender, EventArgs e)
-        {
-           
-        }
-
     }
 }

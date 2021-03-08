@@ -34,14 +34,15 @@ namespace FormApp
             // 
             // numericUpDownLight1
             // 
-            this.numericUpDownLight1.ButtonLightColor = System.Drawing.Color.Yellow;
-            this.numericUpDownLight1.Location = new System.Drawing.Point(13, 13);
+            this.numericUpDownLight1.ButtonLightColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.numericUpDownLight1.Location = new System.Drawing.Point(22, 21);
+            this.numericUpDownLight1.MinimumSize = new System.Drawing.Size(35, 30);
             this.numericUpDownLight1.Name = "numericUpDownLight1";
             this.numericUpDownLight1.Size = new System.Drawing.Size(70, 30);
             this.numericUpDownLight1.TabIndex = 0;
             this.numericUpDownLight1.Text = null;
-            this.numericUpDownLight1.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.numericUpDownLight1.Value = 56;
+            this.numericUpDownLight1.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.numericUpDownLight1.Value = 0;
             // 
             // DemoForm
             // 

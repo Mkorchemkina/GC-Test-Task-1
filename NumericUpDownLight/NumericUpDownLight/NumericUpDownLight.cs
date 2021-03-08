@@ -51,12 +51,16 @@ namespace NumericUpDownLight
            Browsable(false)
         ]
         public override string Text { get; set; }
+
+
+        private const int DefaultHeight = 30;
+        private const int DefaultWidth = 70;
         private const int ButtonWidth = 20;
         Rectangle FieldRect
         {
             get
             {
-                return new Rectangle(0, 0, Size.Width, Size.Height);
+                return new Rectangle(0, 0, Size.Width, Size.Height - 1);
             }
 
         }
@@ -83,6 +87,8 @@ namespace NumericUpDownLight
         }
 
         public Color ButtonLightColor { get; set; }
+        private Color UpBColor;
+        private Color DownBColor;
 
         public NumericUpDownLight()
         {
@@ -92,16 +98,21 @@ namespace NumericUpDownLight
 
         void InitializeComponent()
         {
-            Size = new Size(70, 30);
+            Size = new Size(DefaultWidth, DefaultHeight);
+            MinimumSize = new Size(DefaultWidth / 2, DefaultHeight);
 
-            ControlStyles StyleToSet = ControlStyles.FixedHeight;
-            StyleToSet |= (ControlStyles.UserPaint | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint);
+            StoreTextAlign = ContentAlignment.TopLeft;
+            StoreValue = 0;
+
+            UpBColor = BackColor;
+            DownBColor = BackColor;
+
+            ControlStyles StyleToSet = ControlStyles.UserPaint | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint;
             SetStyle(StyleToSet, true);
             UpdateStyles();
         }
         protected override void OnPaint(PaintEventArgs e)
         {
-            // Call the OnPaint method of the base class.  
             base.OnPaint(e);
 
             Color MyBlack;
@@ -109,15 +120,6 @@ namespace NumericUpDownLight
                 MyBlack = Color.Black;
             else
                 MyBlack = Color.White;
-
-            Color UpBColor = BackColor;
-            Color DownBColor = BackColor;
-
-            Point MousePoint = PointToClient(MousePosition);
-            if (UpButtonRect.Contains(MousePoint))
-                UpBColor = ButtonLightColor;
-            if (DownButtonRect.Contains(MousePoint))
-                DownBColor = ButtonLightColor;
 
             using (SolidBrush ArrowBrush = new SolidBrush(MyBlack))
             using (SolidBrush BackBrush = new SolidBrush(BackColor))
@@ -196,31 +198,51 @@ namespace NumericUpDownLight
             }
         }
 
+        private bool CheckButColorChange(Rectangle ButtonRect, Point MousePos, ref Color ButColor)
+        {
+            bool ColorChangedFlag = false;
+            if (ButtonRect.Contains(MousePos))
+            {
+                if (ButColor == BackColor)
+                {
+                    ButColor = ButtonLightColor;
+                    ColorChangedFlag = true;
+                }
+            }
+            else if (ButColor != BackColor)
+            {
+                ButColor = BackColor;
+                ColorChangedFlag = true;
+            }
+            return ColorChangedFlag;
+
+        }
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            // do some other stuff
             Point MousePoint = e.Location;
-            if (UpButtonRect.Contains(MousePoint))
-            {
+            bool UpBColorChanged = CheckButColorChange(UpButtonRect, MousePoint, ref UpBColor);
+            bool DownBColorChanged = CheckButColorChange(DownButtonRect, MousePoint, ref DownBColor);
+
+            if (UpBColorChanged || DownBColorChanged)
                 Invalidate();
-            }
-            if (DownButtonRect.Contains(MousePoint))
-            {
-                Invalidate();
-            }
             base.OnMouseMove(e);
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            if (UpBColor != BackColor || DownBColor != BackColor)
+                Invalidate();
+            UpBColor = BackColor;
+            DownBColor = BackColor;
+            base.OnMouseLeave(e);
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            // do some other stuff
             Point ClickPoint = e.Location;
 
-            //to screen?
             if (UpButtonRect.Contains(ClickPoint))
             {
-                //up button
-                //down button
                 Value++;
             }
             if (DownButtonRect.Contains(ClickPoint))
